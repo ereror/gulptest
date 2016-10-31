@@ -17,12 +17,13 @@ var streamify = require('gulp-streamify');
 var plumder = require('gulp-plumber');
 var babel = require('gulp-babel');
 var seq   = require('gulp-sequence');
+var argv = require('argv');
 
 var TMP_FOLDER ='tmp/';
 
 var DEPLOY_FOLDER ='build';
 
-var JSS=["src/app/**/*.js"];
+var JSS=["src/app/**/*.js",'!src/app/module/*.js'];
 var CSSDIR=["src/assets/style/**/*.less"];
 var VIEWS=["src/views/**/*.jade"];
 var IMAGES=["src/assets/image/**/*"];
@@ -35,7 +36,7 @@ var config={
     packageCache:{},
     setup:function(bundle){
         bundle.transform('bulkify');
-        bundle.transform(babelify,{presets: ["es2015"]});
+        bundle.transform("babelify",{"presets": ["es2015"]});
     }
 };
 
@@ -43,6 +44,16 @@ gulp.task('clear', function(cb){
     del([FOLDER],cb);
 });
 
+//引入最新babelify模块才能编译成功
+gulp.task('modulejs', function(){
+    return browserify('./src/app/module/main.js')
+    .transform(babelify,{presets:['es2015']})
+    .bundle()
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest(FOLDER+"scripts"));
+});
+
+//浏览器模块
 gulp.task("bundle", watchify(function(wf){
     return gulp.src(JSS)
            .pipe(plumder())
@@ -83,12 +94,13 @@ gulp.task("watch",function(){
     gulp.watch(CSSDIR,["compile-style"]);
     gulp.watch(IMAGES,["compile-image"]);
     gulp.watch(JSS,["bundle"]);
+    gulp.watch('src/app/module/*.js',['modulejs']);
     gulp.watch(FOLDER+"**/*",{read:false}).on('change', function(event){
         browserSync.reload();
     });
 });
 
-gulp.task("default",["bundle","compile-views","compile-lib","compile-style","compile-image"]);
+gulp.task("default",["bundle","modulejs","compile-views","compile-lib","compile-style","compile-image"]);
 
 gulp.task("dev",["default"],function(){
     console.log("##Starting Server.......");

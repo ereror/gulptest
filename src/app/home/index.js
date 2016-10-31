@@ -1,2 +1,3 @@
-let hello = "youbig";
-console.log(hello+"131231");
+var square = require('./export');
+console.log("js:index");
+console.log(square(125,7));

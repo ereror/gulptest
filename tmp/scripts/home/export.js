@@ -6,11 +6,4 @@ module.exports = function (a, b) {
     return a * b;
 };
 
-},{}],2:[function(require,module,exports){
-"use strict";
-
-var square = require('./export');
-console.log("js:index");
-console.log(square(125, 7));
-
-},{"./export":1}]},{},[2]);
+},{}]},{},[1]);
