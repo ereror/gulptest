@@ -1,0 +1,20 @@
+{
+  "name": "bowerlibs",
+  "description": "",
+  "main": "gulpfile.js",
+  "authors": [
+    "qintianlover <154478843@qq.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/ereror/gulptest",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": "1.5.6"
+  }
+}
