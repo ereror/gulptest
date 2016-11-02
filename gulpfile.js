@@ -18,6 +18,7 @@ var plumder = require('gulp-plumber');
 var babel = require('gulp-babel');
 var seq   = require('gulp-sequence');
 var argv = require('argv');
+var eslint = require('gulp-eslint');
 
 var TMP_FOLDER ='tmp/';
 
@@ -44,6 +45,9 @@ gulp.task('clear', function(cb){
     del([FOLDER],cb);
 });
 
+gulp.task('lint',function(){
+    return gulp.src('src/app/**/*.js').pipe(eslint()).pipe(eslint.format());
+});
 //引入最新babelify模块才能编译成功
 gulp.task('modulejs', function(){
     return browserify('./src/app/module/main.js')
