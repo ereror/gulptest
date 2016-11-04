@@ -19,12 +19,16 @@ var babel = require('gulp-babel');
 var seq   = require('gulp-sequence');
 var argv = require('argv');
 var eslint = require('gulp-eslint');
+var sourcemaps = require('gulp-sourcemaps');
+
+//typescript
+var tsify = require('tsify');
 
 var TMP_FOLDER ='tmp/';
 
 var DEPLOY_FOLDER ='build';
 
-var JSS=["src/app/**/*.js",'!src/app/module/*.js'];
+var JSS=["src/app/**/*.js",'!src/app/module/*.js','!src/app/typescript/*.ts'];
 var CSSDIR=["src/assets/style/**/*.less"];
 var VIEWS=["src/views/**/*.jade"];
 var IMAGES=["src/assets/image/**/*"];
@@ -48,6 +52,31 @@ gulp.task('clear', function(cb){
 gulp.task('lint',function(){
     return gulp.src('src/app/**/*.js').pipe(eslint()).pipe(eslint.format());
 });
+
+//typescript 模块
+
+gulp.task('typejs', function(){
+    return browserify({
+        basedir: '.',
+        debug: true,
+        entries: ['src/app/typescript/main.ts'],
+        cache: {},
+        packageCache: {}
+    })
+    .plugin(tsify)
+    .transform('babelify', {
+        presets:['es2015'],
+        extensions: ['.ts']
+    })
+    .bundle()
+    .pipe(source('bundle.js'))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(FOLDER+"scripts/typescript"));
+});
+
 //引入最新babelify模块才能编译成功
 gulp.task('modulejs', function(){
     return browserify('./src/app/module/main.js')
@@ -56,7 +85,6 @@ gulp.task('modulejs', function(){
     .pipe(source('bundle.js'))
     .pipe(gulp.dest(FOLDER+"scripts"));
 });
-
 //浏览器模块
 gulp.task("bundle", watchify(function(wf){
     return gulp.src(JSS)
@@ -99,12 +127,13 @@ gulp.task("watch",function(){
     gulp.watch(IMAGES,["compile-image"]);
     gulp.watch(JSS,["bundle"]);
     gulp.watch('src/app/module/*.js',['modulejs']);
+    gulp.watch('src/app/typescript/*.ts',['typejs']);
     gulp.watch(FOLDER+"**/*",{read:false}).on('change', function(event){
         browserSync.reload();
     });
 });
 
-gulp.task("default",["bundle","modulejs","compile-views","compile-lib","compile-style","compile-image"]);
+gulp.task("default",["bundle","modulejs","typejs", "compile-views","compile-lib","compile-style","compile-image"]);
 
 gulp.task("dev",["default"],function(){
     console.log("##Starting Server.......");
