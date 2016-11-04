@@ -3,3 +3,5 @@ build/
 npm-debug.log
 temp/
 src/app/test/
+tmp/libs
+libs/
